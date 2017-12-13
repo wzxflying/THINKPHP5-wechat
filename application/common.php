@@ -10,3 +10,13 @@
 // +----------------------------------------------------------------------
 
 // 应用公共文件
+function tp5ModelTransfer($array)
+{
+    if (empty($array) || !count($array)) {
+        return false;
+    }
+    foreach ($array as $value) {
+        $datarray[] = $value->toArray();
+    }
+    return $datarray;
+}
