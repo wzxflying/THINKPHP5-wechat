@@ -16,7 +16,7 @@ function tp5ModelTransfer($array)
         return false;
     }
     foreach ($array as $value) {
-        $datarray[] = $value->toArray();
+        $datarray[] = $value->toJson();
     }
     return $datarray;
 }
