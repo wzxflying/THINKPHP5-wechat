@@ -10,13 +10,38 @@
 // +----------------------------------------------------------------------
 
 // 应用公共文件
-function tp5ModelTransfer($array)
+function request_post($url = '', $param = '')
 {
-    if (empty($array) || !count($array)) {
+    if(empty($url) || empty($param)){
         return false;
     }
-    foreach ($array as $value) {
-        $datarray[] = $value->toJson();
+    $postUrl = $url;
+    $curlPost = $param;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $postUrl);
+    curl_setopt($ch, CURLOPT_HEADER, 0);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost);
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return $data;
+
+}
+function request_get($url = '')
+{
+    if(empty($url)){
+        return false;
     }
-    return $datarray;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 500);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $data = curl_exec($ch);
+    curl_close($ch);
+    return $data;
 }
