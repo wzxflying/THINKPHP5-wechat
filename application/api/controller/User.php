@@ -124,9 +124,93 @@ class User extends Base
             }
         }
         //用户手机检测
-        
+        if ($tel){
+            if ($userInfo['tel'] && $oldTel!==$userInfo['tel']){
+                return json(array('status'=>0,'err'=>'原手机号不正确.'));
+            }
+            $checkTel = db('user')->where('tel = '.$tel.' AND del=0')->count();
+            if ($checkTel){
+                return json(array('status'=>0,'err'=>'新手机号已存在.'));
+            }
+            $data['tel'] = trim($tel);
+        }
+
+        if ($uname && $uname!==$userInfo['uname']) {
+            $data['uname'] = trim($uname);
+        }
+
+        if (empty($data)){
+            return json(array('status'=>0,'err'=>'您没有输入要修改的信息.'.__LINE__));
+        }
+
+        $result = db('user')->where('id='.$userId)->update($data);
+        if ($result){
+            return json(array('status'=>1));
+        }else{
+            return json(array('status'=>0,'err'=>'操作失败.'));
+        }
 
     }
+
+    /**
+     * 用户反馈接口
+     */
+    public function feedBack()
+    {
+        $uid = input('uid');
+        if (empty($uid)){
+            return json(array('status'=>0,'err'=>'登录状态异常.'));
+        }
+
+        $con = input('post.con');
+        if (empty($con)){
+            return json(array('status'=>0,'err'=>'请输入反馈内容.'));
+        }
+
+        $data = [
+            'uid' => $uid,
+            'message' => $con,
+            'addtime' => time()
+        ];
+        $result = db('fankui')->insert($data);
+        if ($result){
+            return json(array('status'=>1));
+        }else{
+            return json(array('status'=>0,'保存失败！'));
+        }
+    }
+
+    /**
+     * 用户商品收藏信息
+     */
+    public function collection()
+    {
+        $userId = input('id');
+        if (empty($userId)){
+            return json(array('status'=>0,'err'=>'系统错误，请稍后再试.'));
+        }
+
+        $proSC = db('product_sc');
+        $count = $proSC->where('uid='.$userId)->count();
+        //分页没实现
+
+        $scList = $proSC->where('uid='.$userId)->order('id desc')->select();
+        foreach ($scList as $k => $v){
+            $proInfo = db('product')->where('id='. $v['pid'] .' AND del=0 AND is_down=0')->find();
+            if ($proInfo){
+                $scList[$k]['pro_name'] = $proInfo['name'];
+                $scList[$k]['photo'] = __DATAURL__.$proInfo['photo_x'];
+                $scList[$k]['price_yh'] = number_format($proInfo['price_yh'], 2);
+            }else{
+                $proSC->where('id='.$v['id'])->delete();
+            }
+        }
+        return json(array('status'=>1,'sc_list'=>$scList));
+    }
+
+    /**
+     * 用户单个商品取消收藏
+     */
 
 
 
