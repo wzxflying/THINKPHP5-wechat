@@ -448,37 +448,4 @@ class User extends Base
 
         return json(array('status'=>1,'offdates'=>$offdates,'nouses'=>$nouses,'useds'=>$userds));
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
