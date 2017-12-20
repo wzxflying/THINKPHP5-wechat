@@ -18,7 +18,7 @@ class Search extends Base
     {
         $uid = input('uid');
         //获取热门搜索内容
-        $remen = db('search_record')->group('keyword')->field('SUM(num) desc')->limit(10)->select();
+        $remen = db('search_record')->group('keyword')->field('SUM(num)')->limit(10)->select();
         //获取历史搜索记录
         $history = array();
         if ($uid){
