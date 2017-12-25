@@ -72,6 +72,4 @@ class Web extends Base
         }
         return json(array('status'=>1,'pro'=>$proList,'shop'=>$storeList));
     }
-
-
 }
