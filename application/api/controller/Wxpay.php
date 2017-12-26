@@ -132,7 +132,7 @@ class Wxpay extends Base
 
         $up = array();
         $up['type'] = $pay_type;
-        $up['price_h'] = sprintf("%.2f",floatval($total_fee/100));
+        $up['price_h'] = sprintf("%.2f", floatval($total_fee / 100));
         $up['status'] = 20;
         $up['trade_no'] = $trade_no;
         $res = db('order')->where('order_sn="'.$order_sn.'"')->update($up);
