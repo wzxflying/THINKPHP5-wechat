@@ -19,7 +19,8 @@
         "php": ">=5.4.0",
         "topthink/framework": "~5.0.0",
         "topthink/think-captcha": "1.0.7",
-        "topthink/think-image": "^1.0"
+        "topthink/think-image": "^1.0",
+        "xxh/think-wxminihelper": "^1.0"
     },
     "autoload": {
         "psr-4": {
