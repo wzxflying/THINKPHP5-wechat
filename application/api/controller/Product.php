@@ -46,10 +46,10 @@ class Product extends Base
 
         //处理产品属性
         $catList = array();
+        $commodityAttr = array();//产品库还剩下的产品规格
+        $attrValueList = array();//产品所有的产品规格
         if (!empty($pro['pro_buff'])){
             $pro_buff = explode(',', $pro['pro_buff']);
-            $commodityAttr = array();//产品库还剩下的产品规格
-            $attrValueList = array();//产品所有的产品规格
             foreach ($pro_buff as $k =>$v){
                 $attrName = db('attribute')->where('id='.$v)->value('attr_name');
                 $guigeList = db('guige')->where('attr_id='.$v.' AND pid='.$pro['id'])->field('id,name')->select();
@@ -69,13 +69,15 @@ class Product extends Base
         $content = str_replace('/minipetmrschool/Data/', __DATAURL__, $pro['content']);
         $pro['content'] = html_entity_decode($content, ENT_QUOTES, 'utf-8');
         //检测产品是否收藏
-        $col = db('product_sc')->where('uid='. input('uid') .' AND pid=' .$proId)->value('id');
-        if ($col){
-            $pro['collect'] = 1;
-        }else{
-            $pro['collect'] = 0;
+        $uid = input('uid');
+        if (!empty($uid)){
+            $col = db('product_sc')->where('uid='. input('uid') .' AND pid='.$proId)->value('id');
+            if ($col){
+                $pro['collect'] = 1;
+            }else{
+                $pro['collect'] = 0;
+            }
         }
-
         return json(array('status'=>1,'pro'=>$pro,'commodityAttr'=>$commodityAttr,'attrValueList'=>$attrValueList));
     }
 

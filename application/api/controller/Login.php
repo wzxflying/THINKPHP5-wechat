@@ -54,25 +54,24 @@ class Login extends Base
         }
 
         $con = [];
-        $con['openid'] = trim($openid);
-        $uid = db('user')->where($con)->field('id')->select();
+        $con['openid'] = $openid;
+        $uid = db('user')->where($con)->find();
         if(!empty($uid)){
-            $userinfo = db('user')->where('id ='. intval($uid))->find();
-            if(intval($userinfo['del'] == 1)){
+            if($uid['del'] == 1){
                 return json(array('status' =>0,'err'=>'账号状态异常'));
             }
 
-            $err = [
-                'id' => intval($uid),
-                'nickname' => input('post.nickname'),
-                'headurl' => input('post.headurl')
+            $arr = [
+                'id' => $uid['id'],
+                'nickname' => input('post.NickName'),
+                'headurl' => input('post.HeadUrl')
             ];
-            return json(array('status' => 1,'arr' => $err));
+            return json(array('status' => 1,'arr' => $arr));
         }else{
             $data = [
-              'name' => input('post.nickname'),
-              'uname' => input('post.nickname'),
-              'photo' => input('post.headurl'),
+              'name' => input('post.NickName'),
+              'uname' => input('post.NickName'),
+              'photo' => input('post.HeadUrl'),
               'sex' => input('post.gender'),
               'openid' => $openid,
               'source' => 'wx',
@@ -83,12 +82,12 @@ class Login extends Base
             }
             $res = db('user')->insert($data);
             if($res){
-                $err = [
+                $arr = [
                     'id' => intval($res),
                     'nickname' => $data['name'],
                     'headurl' => $data['photo']
                 ];
-                return json(array('status' => 1, 'arr' => $err));
+                return json(array('status' => 1, 'arr' => $arr));
             }else{
                 return json(array('status' => 0,'err' => '授权失败！'.__LINE__));
             }
@@ -149,19 +148,20 @@ class Login extends Base
         $appid = $wx_config['appid'];
         $secret = $wx_config['secret'];
 
-        $code = trim(input('post.code'));
-        if(empty($code)){
-            return json(array('status'=>0,'err'=>'非法操作！'));
-        }
+        $code = input('post.code', '', 'htmlspecialchars_decode');
 
-        if(empty($appid) || empty($secret)){
+        if(empty($appid) || empty($secret) || empty($code)){
             return json(array('status'=>0,'err'=>'非法操作！'.__LINE__));
         }
 
         $get_token_url = 'https://api.weixin.qq.com/sns/jscode2session?appid='.$appid.'&secret='.$secret.'&js_code='.$code.'&grant_type=authorization_code';
 
-        request_get($get_token_url); //放回数据
+        $data = request_get($get_token_url); //放回数据
+        $data = json_decode($data, true);
+        return json($data);
     }
+
+
 
     //***************************
     //  前台退出登录接口
