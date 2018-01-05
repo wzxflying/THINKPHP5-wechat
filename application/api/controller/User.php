@@ -23,8 +23,10 @@ class User extends Base
     //***************************
     public function getOrder()
     {
-        $uid = input('post.userid');
-        if (empty($uid)){
+        $uid = input('post.userId');
+        $session3rd = input('post.session3rd');
+        $token = cache($session3rd);
+        if (empty($uid) || empty($token)){
             return json(array('status'=>0,'err'=>'非法操作.'));
         }
         $order = db('order');
@@ -32,7 +34,7 @@ class User extends Base
             'pay_num' => $order->where('uid='.$uid.' AND status=10 AND del=0')->count('id'),
             'rec_num' => $order->where('uid='.$uid.' AND status=30 AND del=0 AND back="0"')->count('id'),
             'finish_num' => $order->where('uid='.$uid.' AND status>30 AND del=0 AND back="0"')->count('id'),
-            'refund_num' => $order->where('uid='.$uid.' AND back>0')->count('id')
+            'refund_num' => $order->where('uid='.$uid.' AND back>"0"')->count('id'),
         ];
         return json(array('status'=>1,'orderInfo'=>$order));
     }

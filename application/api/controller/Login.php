@@ -11,6 +11,7 @@ namespace app\api\controller;
 use think\Config;
 use think\Cookie;
 use think\Session;
+use wlt\wxmini\WXLoginHelper;
 
 class Login extends Base
 {
@@ -144,20 +145,15 @@ class Login extends Base
     //***************************
     public function getSessionKey()
     {
-        $wx_config = Config::get('weixin');
-        $appid = $wx_config['appid'];
-        $secret = $wx_config['secret'];
+        $code = input("code", '', 'htmlspecialchars_decode');
+        $rawData = input("rawData", '', 'htmlspecialchars_decode');
+        $signature = input("signature", '', 'htmlspecialchars_decode');
+        $encryptedData = input("encryptedData", '', 'htmlspecialchars_decode');
+        $iv = input("iv", '', 'htmlspecialchars_decode');
 
-        $code = input('post.code', '', 'htmlspecialchars_decode');
-
-        if(empty($appid) || empty($secret) || empty($code)){
-            return json(array('status'=>0,'err'=>'非法操作！'.__LINE__));
-        }
-
-        $get_token_url = 'https://api.weixin.qq.com/sns/jscode2session?appid='.$appid.'&secret='.$secret.'&js_code='.$code.'&grant_type=authorization_code';
-
-        $data = request_get($get_token_url); //放回数据
-        $data = json_decode($data, true);
+        $wxHelper = new WXLoginHelper();
+        $data = $wxHelper->checkLogin($code, $rawData, $signature, $encryptedData, $iv);
+        
         return json($data);
     }
 

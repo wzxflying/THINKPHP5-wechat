@@ -166,24 +166,21 @@ class Address extends Base
      */
     public function setDefault()
     {
-        $uid = input('uid');
+        $uid = input('post.uid');
         if (empty($uid)){
             return json(array('status'=>0,'err'=>'登录状态异常.'));
         }
-        $addrId = input('addr_id');
+        $addrId = input('post.addr_id');
         if (empty($addrId)){
             return json(array('status'=>0,'err'=>'地址信息错误.'));
         }
-        $check = db('address')->where('uid='.$uid. ' AND is_default=1')->find();
-        if ($check){
-            $up = db('address')->where('uid='.$uid)->update(array('is_default'=>0));
-            if (empty($up)){
-                return json(array('status'=>0,'err'=>'设置失败.'.__LINE__));
-            }
-            return json(array('status'=>1));
+        //清空用户其他默认地址
+        $up = db('address')->where('uid='.$uid)->update(array('is_default' => 0));
+        if (empty($up)){
+            return json(array('status'=>0,'err'=>'清空失败.'.__LINE__));
         }
-
-        $up2 = db('address')->where('id='.$addrId.' AND uid='.$uid)->update(array('is_default'=>1));
+        //设置用户选择默认地址
+        $up2 = db('address')->where('id='.$addrId.' AND uid='.$uid)->update(array('is_default' => 1));
         if ($up2){
             return json(array('status'=>1));
         }else{

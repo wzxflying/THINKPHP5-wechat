@@ -129,8 +129,8 @@ class Shopping extends Base
         $shopping = db('shopping_char');
 
         $data = array();
-        $cartInfo =$shopping->where('pid='.$pid.' AND uid='.$uid)->field('id,num')->find();
-        if ($cartInfo){
+        $cartInfo =$shopping->where('pid='.$pid.' AND uid='.$uid)->field('id,num,shop_id')->find();
+        if (!empty($cartInfo)){
             $data['num'] = $num;
             if ($num >= $checkInfo['num']){
                 return json(array('status'=>0,'err'=>'库存不足！'));
@@ -146,7 +146,6 @@ class Shopping extends Base
                 'num' => $num,
                 'addtime' => time(),
                 'uid' =>$uid,
-                'shop_id' => $cartInfo['shop_id'],
                 'type' => $ptype,
                 'price' => $checkInfo['price_yh']
             ];

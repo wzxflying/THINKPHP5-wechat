@@ -201,7 +201,7 @@ class Payment extends Base
      * 购物车结算 获取数据
      */
     public function buy_cart(){
-        $uid = intval(input('uid'));
+        $uid = input('uid');
         if (!$uid) {
             return json(array('status'=>0,'err'=>'登录状态异常.'));
 
@@ -211,82 +211,37 @@ class Payment extends Base
         //运费
         $post = db('post');
         $qz= Config::get('DB_PREFIX');
-        $add=$address->where('uid='.intval($uid))->order('is_default desc,id desc')->limit(1)->find();
+        $add=$address->where('uid='.$uid)->order('is_default desc,id desc')->limit(1)->find();
         $product=db("product");
         $shopping=db('shopping_char');
         $cart_id = trim(input('cart_id'),',');
         $id=explode(',', $cart_id);
         if (!$cart_id) {
             return json(array('status'=>0,'err'=>'网络异常.'.__LINE__));
-
         }
-
-        $pro=array();
-        $pro1=array();
+        //计算总价
+        $price = 0;
         foreach($id as $k => $v){
             //检测购物车是否有对应数据
-            $check_cart = $shopping->where('id='.intval($v))->value('id');
-            if (!$check_cart) {
+            $cartInfo = $shopping->where('id='.$v)->find();
+            if (!$cartInfo) {
                 return json(array('status'=>0,'err'=>'非法操作.'.__LINE__));
-
             }
-
-            $pro[$k]=$shopping->where(''.$qz.'shopping_char.uid='.intval($uid).' and '.$qz.'shopping_char.id='.$v)->join('LEFT JOIN __PRODUCT__ ON __PRODUCT__.id=__SHOPPING_CHAR__.pid')->join('LEFT JOIN __SHANGCHANG__ ON __SHANGCHANG__.id=__SHOPPING_CHAR__.shop_id')->field(''.$qz.'product.num as pnum,'.$qz.'shopping_char.id,'.$qz.'shopping_char.pid,'.$qz.'shangchang.name as sname,'.$qz.'product.name,'.$qz.'product.shop_id,'.$qz.'product.photo_x,'.$qz.'product.price_yh,'.$qz.'shopping_char.num,'.$qz.'shopping_char.buff,'.$qz.'shopping_char.price')->find();
-            //获取运费
-            $yunfei = $post->where('pid='.intval($pro[$k]['shop_id']))->find();
-            //dump($yunfei);
-            if($pro[$k]['buff']!=''){
-                $pro[$k]['zprice']=$pro[$k]['price']*$pro[$k]['num'];
-            }else{
-                $pro[$k]['price']=$pro[$k]['price_yh'];
-                $pro[$k]['zprice']=$pro[$k]['price']*$pro[$k]['num'];
-            }
+            $pro[$k] = $product->where('id='.$cartInfo['pid'])->find();
             $pro[$k]['photo_x'] = __DATAURL__.$pro[$k]['photo_x'];
-            //$pro['zprice']+=$pro[$k]['zprice'];
-            //    $buff_text='';
-            // if($pro[$k]['buff']){
-            // 	//验证属性
-            // 	$buff = explode(',',$pro[$k]['buff']);
-            // 	if(is_array($buff)){
-            // 		foreach($buff as $keys => $val){
-            // 			$ggid=db("guige")->where('id='.intval($val))->value('name');
-            // 			//$buff_text .= select('name','aaa_cpy_category','id='.$val['id']).':'.select('name','aaa_cpy_category','id='.$val['val']).' ';
-            // 			$buff_text .=' '.$ggid.' ';
-            // 		}
-            // 	}
-            // }
-            // 	$pro[$k]['buff']=$buff_text;
-            //获取可用优惠券
-            $vou = $this->get_voucher($uid,intval($pro[$k]['pid']),$id);
+            $pro[$k]['num'] = $cartInfo['num'];
+            $pro[$k]['price'] = $cartInfo['price'] * $cartInfo['num'];
+            $price += $pro[$k]['price'];
         }
-
-        //计算总价
-        $price = NULL;
-        foreach($id as $ks => $vs){
-            $pro1[$ks]=$shopping->where(''.$qz.'shopping_char.uid='.intval($uid).' and '.$qz.'shopping_char.id='.$vs)->join('LEFT JOIN __PRODUCT__ ON __PRODUCT__.id=__SHOPPING_CHAR__.pid')->join('LEFT JOIN __SHANGCHANG__ ON __SHANGCHANG__.id=__SHOPPING_CHAR__.shop_id')->field(''.$qz.'product.num as pnum,'.$qz.'shopping_char.id,'.$qz.'shangchang.name as sname,'.$qz.'product.name,'.$qz.'product.photo_x,'.$qz.'product.price_yh,'.$qz.'shopping_char.num,'.$qz.'shopping_char.buff,'.$qz.'shopping_char.price')->find();
-            if($pro1[$ks]['buff']){
-                $pro1[$ks]['zprice']=$pro1[$ks]['price']*$pro1[$ks]['num'];
-            }else{
-                $pro1[$ks]['price']=$pro1[$ks]['price_yh'];
-                $pro1[$ks]['zprice']=$pro1[$ks]['price']*$pro1[$ks]['num'];
-            }
-            $price += $pro1[$ks]['zprice'];
-        }
-
+        //获取运费
         //如果需要运费
-        if ($yunfei) {
-            if ($yunfei['price_max']>0 && $yunfei['price_max']<=$price) {
-                $yunfei['price']=0;
-            }
-        }
-
-        if (!$add) {
+        if ($add) {
             $addemt = 1;
         }else{
             $addemt = 0;
         }
 
-        return json(array('status'=>1,'vou'=>$vou,'price'=>floatval($price),'pro'=>$pro,'adds'=>$add,'addemt'=>$addemt,'yun'=>$yunfei));
+        return json(array('status'=>1,'price'=>floatval($price),'pro'=>$pro,'adds'=>$add,'addemt'=>$addemt));
 
     }
 
@@ -301,7 +256,7 @@ class Payment extends Base
         $order_pro=db("order_product");
         $shopping=db('shopping_char');
 
-        $uid = intval(input('uid'));
+        $uid = input('uid');
         if (!$uid) {
             return json(array('status'=>0,'err'=>'登录状态异常.'));
 
@@ -315,40 +270,42 @@ class Payment extends Base
 
         //生成订单
         $num = NULL;
-        $ozprice = NULL;
+        $price = NULL;
         try {
             $qz= Config::get('DB_PREFIX');//前缀
             $cart_id = explode(',', $cart_id);
             $shop=array();
-            foreach($cart_id as $ke => $vl){
-                $shop[$ke]=$shopping->where(''.$qz.'shopping_char.uid='.intval($uid).' and '.$qz.'shopping_char.id='.$vl)->join('LEFT JOIN __PRODUCT__ ON __PRODUCT__.id=__SHOPPING_CHAR__.pid')->field(''.$qz.'shopping_char.pid,'.$qz.'shopping_char.num,'.$qz.'shopping_char.shop_id,'.$qz.'shopping_char.buff,'.$qz.'shopping_char.price,'.$qz.'product.price_yh')->find();
-                $num+=$shop[$ke]['num'];
-                if($shop[$ke]['buff']!=''){
-                    $ozprice+=$shop[$ke]['price']*$shop[$ke]['num'];
-                }else{
-                    $shop[$ke]['price']=$shop[$ke]['price_yh'];
-                    $ozprice+=$shop[$ke]['price']*$shop[$ke]['num'];
+            foreach($cart_id as $k => $v){
+                //检测购物车是否有对应数据
+                $cartInfo = $shopping->where('id='.$v)->find();
+                if (!$cartInfo) {
+                    return json(array('status'=>0,'err'=>'非法操作.'.__LINE__));
                 }
+                $pro[$k] = $product->where('id='.$cartInfo['pid'])->find();
+                $pro[$k]['photo_x'] = __DATAURL__.$pro[$k]['photo_x'];
+                $pro[$k]['num'] = $cartInfo['num'];
+                $pro[$k]['price'] = $cartInfo['price'] * $cartInfo['num'];
+                $price += $pro[$k]['price'];
             }
 
             $yunPrice = array();
             if ($_POST['yunfei']) {
-                $yunPrice = $post->where('id='.intval(input('yunfei')))->find();
+                $yunPrice = $post->where('id='.input('yunfei'))->find();
             }
 
-            $data['shop_id']=$shop[$ke]['shop_id'];
+            $data['shop_id']=$shop[$k]['shop_id'];
             $data['uid']=intval($uid);
 
             if(!empty($yunPrice)){
                 $data['post'] = $yunPrice['id'];
-                $data['price']=floatval($ozprice)+$yunPrice['price'];
+                $data['price']=floatval($price)+$yunPrice['price'];
             }else{
                 $data['post'] = 0;
-                $data['price']=floatval($ozprice);
+                $data['price']=floatval($price);
             }
 
             $data['amount'] = $data['price'];
-            $vid = intval(input('vid'));
+            $vid = input('vid');
             if ($vid) {
                 $vouinfo = db('user_voucher')->where('status=1 AND uid='.intval($uid).' AND vid='.intval($vid))->find();
                 $chk = db('order')->where('uid='.intval($uid).' AND vid='.intval($vid).' AND status>0')->find();
@@ -376,11 +333,11 @@ class Payment extends Base
             $data['type']    = input('type');
             $data['status']  = 10;
 
-            $adds_id = intval(input('aid'));
+            $adds_id = input('aid');
             if (!$adds_id) {
                 throw new \Exception("请选择收货地址.".__LINE__);
             }
-            $adds_info = db('address')->where('id='.intval($adds_id))->find();
+            $adds_info = db('address')->where('id='.$adds_id)->find();
             $data['receiver'] = $adds_info['name'];
             $data['tel'] = $adds_info['tel'];
             $data['address_xq'] = $adds_info['address_xq'];
@@ -391,48 +348,34 @@ class Payment extends Base
 
             $result = $order->insert($data);
             if($result){
-                //$prid = explode(",", $_POST['ids']);
-                foreach($cart_id as $key => $var){
-                    $shops[$key]=$shopping->where(''.$qz.'shopping_char.uid='.intval($uid).' and '.$qz.'shopping_char.id='.intval($var))->join('LEFT JOIN __PRODUCT__ ON __PRODUCT__.id=__SHOPPING_CHAR__.pid')->field(''.$qz.'shopping_char.pid,'.$qz.'shopping_char.num,'.$qz.'shopping_char.shop_id,'.$qz.'shopping_char.buff,'.$qz.'shopping_char.price,'.$qz.'product.name,'.$qz.'product.photo_x,'.$qz.'product.price_yh,'.$qz.'product.num as pnum')->find();
-                    if($shops[$key]['buff']=='' || !$shops[$key]['buff']){
-                        $shops[$key]['price']=$shops[$key]['price_yh'];
-                    }
+                foreach($cart_id as $k => $v){
+                    $cartInfo = $shopping->where('id='.$v)->find();
 
-                    $buff_text='';
-                    if($shops[$key]['buff']){
-                        //验证属性
-                        $buff = explode(',',$shops[$key]['buff']);
-                        if(is_array($buff)){
-                            foreach($buff as $keys => $val){
-                                $ggid=db("guige")->where('id='.intval($val))->value('name');
-                                $buff_text .= $ggid.' ';
-                            };
-                        }
-                    }
+                    $shops[$k]= $product->where('id='.$cartInfo['pid'])->find();
 
-                    $date = array();
-                    $date['pid']=$shops[$key]['pid'];
-                    $date['name']=$shops[$key]['name'];
-                    $date['order_id']=$result;
-                    $date['price']=$shops[$key]['price'];
-                    $date['photo_x']=$shops[$key]['photo_x'];
-                    $date['pro_buff']=trim($buff_text,' ');
-                    $date['addtime']=time();
-                    $date['num']=$shops[$key]['num'];
-                    $date['pro_guige']='';
+                    $date = [
+                        'pid' => $shop[$k]['pid'],
+                        'name' => $shops[$k]['name'],
+                        'order_id' => $result,
+                        'price' => $shops[$k]['price'],
+                        'photo_x' => $shops[$k]['photo_x'],
+                        'addtime' => time(),
+                        'num' => $cartInfo[$k]['num'],
+                        'pro_guige' => ''
+                    ];
                     $res = $order_pro->update($date);
                     if (!$res) {
                         throw new \Exception("下单 失败！".__LINE__);
                     }
                     //检查产品是否存在，并修改库存
-                    $check_pro = $product->where('id='.intval($date['pid']).' AND del=0 AND is_down=0')->field('num,shiyong')->find();
-                    $up = array();
-                    $up['num'] = intval($check_pro['num'])-intval($date['num']);
-                    $up['shiyong'] = intval($check_pro['shiyong'])+intval($date['num']);
-                    $product->where('id='.intval($date['pid']))->update($up);
-                    //echo  $product->getLastSql();
+                    $check_pro = $product->where('id='.$date['pid'].' AND del=0 AND is_down=0')->field('num,shiyong')->find();
+                    $up = [
+                        'num' => $check_pro['num'] - $data['num'],
+                        'shiyong' => $check_pro['shiyong'] + $data['num']
+                    ];
+                    $product->where('id='.$date['pid'])->update($up);
                     //删除购物车数据
-                    $shopping->where('uid='.intval($uid).' AND id='.intval($var))->delete();
+                    $shopping->where('uid='.$uid.' AND id='.$v)->delete();
 
                 }
             }else{
@@ -440,14 +383,14 @@ class Payment extends Base
             }
         } catch (Exception $e) {
             return json(array('status'=>0,'err'=>$e->getMessage()));
-
         }
 
         //把需要的数据返回
-        $arr = array();
-        $arr['order_id'] = $result;
-        $arr['order_sn'] = $data['order_sn'];
-        $arr['pay_type'] = input('type');
+        $arr = [
+            'order_id' => $result,
+            'order_sn' => $data['order_sn'],
+            'pay_type' => input('type')
+        ];
         return json(array('status'=>1,'arr'=>$arr));
 
     }

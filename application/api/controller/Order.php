@@ -18,12 +18,12 @@ class Order extends Base
      */
     public function index()
     {
-        $uid = input('uid');
+        $uid = input('post.uid');
         if (empty($uid)){
             return json(array('status'=>0,'err'=>'登录状态异常'));
         }
 
-        $pages = input('page', 0);
+        $pages = input('post.page', 1);
         $limit = $pages*7-7;
 
         $orders = db('order');
@@ -37,7 +37,7 @@ class Order extends Base
             'uid' => $uid,
             'status' => 10
         ];
-        $orderType = trim(input('order_type'));
+        $orderType = trim(input('post.order_type'));
         if ($orderType){
             switch ($orderType){
                 case 'pay':
@@ -65,7 +65,7 @@ class Order extends Base
         $eachpage = 7;
 
         $orderStatus = array('0'=>'已取消','10'=>'待付款','20'=>'待发货','30'=>'待收货','40'=>'待评价','50'=>'交易完成','51'=>'交易关闭');
-        $order = $orders->where($condition)->order('id desc')->field('id,order_sn,pay_sn,status,price,type,product_num')->limit($limit,7)->select();
+        $order = $orders->where($condition)->order('id desc')->field('id,order_sn,pay_sn,status,price,type,product_num')->select();
         foreach ($order as $k => $v){
             $order[$k]['desc'] = $orderStatus[$v['status']];
             $proList = $orderp->where('order_id='.$v['id'])->find();
@@ -162,7 +162,7 @@ class Order extends Base
         $id = input('id');
         $qz = Config::get('DB_PREFIX');
 
-        $orderInfo = $orders->where('id='.$orderId. ' AND del=0')->field('id,order_sn,shop_id,status,addtime,price,type,post,tel,receiver,address,address_xq,remark')->find();
+        $orderInfo = $orders->where('id='.$orderId. ' AND del=0')->field('id,order_sn,shop_id,status,addtime,price,type,post,tel,receiver,address_xq,remark')->find();
         if (empty($orderInfo)){
             return json(array('status'=>0,'err'=>'订单信息错误.'));
         }

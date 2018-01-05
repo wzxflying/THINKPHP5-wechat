@@ -165,7 +165,7 @@ class Product extends Base
     public function lists()
     {
         $id = input('post.cat_id');//获取分类id 这里id是pro表里的cid
-        $brand_id = input('post.brand_id');
+        $brandId = input('post.brand_id');
         $type = input('post.type');//排序类型
 
         $page = input('post.page', 0);
@@ -191,8 +191,8 @@ class Product extends Base
         if ($id){
             $where .=' AND cid='.$id;
         }
-        if ($brand_id){
-            $where .= ' AND brand_id='.$brand_id;
+        if (empty($brandId)){
+            $where .= ' AND brand_id='.$brandId;
         }
         if ($keyword){
             $where .= ' AND name LIKE "%' .$keyword. '%"';
