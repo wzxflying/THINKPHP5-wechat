@@ -39,7 +39,8 @@ class Base extends Controller
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function cityOption($id = 0, $tid = 0, $f = 0){
+    public function cityOption($id = 0, $tid = 0, $f = 0)
+    {
         if ($id == 0 && $tid == 0 && $f == 0){
             return false;
         }
@@ -65,7 +66,8 @@ class Base extends Controller
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function chinaCity(){
+    public function chinaCity()
+    {
         $id = input('get.id');
         $city = db('ChinaCity')->where('tid='.$id)->field('id,name')->select();
         foreach ($city as $k => $v){
@@ -83,7 +85,8 @@ class Base extends Controller
      * @throws \think\db\exception\ModelNotFoundException
      * @throws \think\exception\DbException
      */
-    public function productOption($id = 0, $lv = 0){
+    public function productOption($id = 0, $lv = 0)
+    {
         $sql = db('category')->where('tid='.$id.' AND id!='.$id.'')->field('id,name,hot')->select();
         $hot = null;
         foreach ($sql as $k => $v){
@@ -105,7 +108,8 @@ class Base extends Controller
      * @param $exts 文件类型
      * @param $path 子目录名称
      */
-    public function uploadImage($file, $exts = 'jpg,png,gif', $path = null){
+    public function uploadImage($file, $exts = 'jpg,png,gif', $path = null)
+    {
         if (empty($path)){
             return '请输入路径';
         }
