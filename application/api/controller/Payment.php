@@ -286,14 +286,8 @@ class Payment extends Base
                 $pro[$k]['num'] = $cartInfo['num'];
                 $pro[$k]['price'] = $cartInfo['price'] * $cartInfo['num'];
                 $price += $pro[$k]['price'];
+                $num += $pro[$k]['num'];
             }
-
-            $yunPrice = array();
-            if ($_POST['yunfei']) {
-                $yunPrice = $post->where('id='.input('yunfei'))->find();
-            }
-
-            $data['shop_id']=$shop[$k]['shop_id'];
             $data['uid']=intval($uid);
 
             if(!empty($yunPrice)){
@@ -346,32 +340,32 @@ class Payment extends Base
             $data['remark'] = input('remark');
             $data['order_sn'] = $this->build_order_no();//生成唯一订单号
 
-            $result = $order->insert($data);
+            $result = $order->insertGetId($data);
             if($result){
                 foreach($cart_id as $k => $v){
                     $cartInfo = $shopping->where('id='.$v)->find();
 
-                    $shops[$k]= $product->where('id='.$cartInfo['pid'])->find();
+                    $shops[$k] = $product->where('id='.$cartInfo['pid'])->find();
 
                     $date = [
-                        'pid' => $shop[$k]['pid'],
-                        'name' => $shops[$k]['name'],
-                        'order_id' => $result,
-                        'price' => $shops[$k]['price'],
-                        'photo_x' => $shops[$k]['photo_x'],
-                        'addtime' => time(),
-                        'num' => $cartInfo[$k]['num'],
+                        'pid'       => $shops[$k]['id'],
+                        'name'      => $shops[$k]['name'],
+                        'order_id'  => $result,
+                        'price'     => $shops[$k]['price_yh'],
+                        'photo_x'   => $shops[$k]['photo_x'],
+                        'addtime'   => time(),
+                        'num'       => $cartInfo['num'],
                         'pro_guige' => ''
                     ];
-                    $res = $order_pro->update($date);
+                    $res = $order_pro->insert($date);
                     if (!$res) {
                         throw new \Exception("下单 失败！".__LINE__);
                     }
                     //检查产品是否存在，并修改库存
                     $check_pro = $product->where('id='.$date['pid'].' AND del=0 AND is_down=0')->field('num,shiyong')->find();
                     $up = [
-                        'num' => $check_pro['num'] - $data['num'],
-                        'shiyong' => $check_pro['shiyong'] + $data['num']
+                        'num' => $check_pro['num'] - $date['num'],
+                        'shiyong' => $check_pro['shiyong'] + $date['num']
                     ];
                     $product->where('id='.$date['pid'])->update($up);
                     //删除购物车数据
