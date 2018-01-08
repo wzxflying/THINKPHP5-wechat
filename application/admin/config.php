@@ -6,7 +6,8 @@
  * Time: 13:52
  */
 return array(
-    'TMPL_PARSE_STRING' => array(
-        '__DATA__' => __PUBLIC__.'/Data'
+    'view_replace_str' => array(
+        '__DATA__' => __PUBLIC__.'/Data',
+        '__PUBLIC__' => '/static',
     ),
 );
