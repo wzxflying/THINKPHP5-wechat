@@ -12,7 +12,7 @@ namespace app\admin\controller;
 use think\Request;
 use think\Session;
 
-class Login extends Base
+class Login extends Admin
 {
     /**
      * 登录
@@ -23,19 +23,18 @@ class Login extends Base
      */
     public function index()
     {
-        if (Request::instance()->isPost()){
-            $username = Request::instance()->post('username');
-            $adminInfo = db('adminuser')->where('name='.$username.' AND del<1')->find();
+        if ($this->request->isPost()){
+            $username = $this->request->post('username');
+            $adminInfo = db('adminuser')->where("name='$username' AND del<1")->find();
             $appcheck = db('program')->find();
             if (empty($adminInfo)){
                 $this->error('账号不存在或已注销！');
             }else{
-                if (md5(md5(Request::instance()->post('pwd'))) == $adminInfo['pwd']){
+                if (md5(md5($this->request->post('pwd'))) == $adminInfo['pwd']){
                     $admin = [
                         'id' => $adminInfo['id'],
                         'name' => $adminInfo['name'],
-                        'qx' => $adminInfo['qx'],
-                        'shop_id' => $adminInfo['shop_id']
+                        'qx' => $adminInfo['qx']
                     ];
                     $system = [
                         'name' => $appcheck['name'],
