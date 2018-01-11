@@ -48,19 +48,18 @@
 
 
         <tbody id="news_option">
-        <volist name='list' id="b">
+        {volist name='list' id="b"}
             <tr  class="text-c">
                 <td>{$b.id}</td>
                 <td><img src="__DATA__/{$b.photo}" width="80px" height="80px"></td>
                 <td>{$b.name}</td>
                 <td><if condition="$b.type eq 1"><label style="color:green;">是</label><else />否</if></td>
                 <td class="obj_1">
-                    <a href="{:url('set_tj')}?id={$b.id}" >推荐</a> |
                     <a href="{:url('add')}?id={$b.id}" >修改</a>
                     | <a onclick="del_id_url({$b.id})">删除</a>
                 </td>
             </tr>
-        </volist>
+        {/volist}
         </tbody>
         <tr class="text-c">
             <td colspan="10" class="td_2">

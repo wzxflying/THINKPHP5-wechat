@@ -13,7 +13,6 @@
     <!--[if lt IE 9]>
     <script type="text/javascript" src="__PUBLIC__/admin/lib/html5shiv.js"></script>
     <script type="text/javascript" src="__PUBLIC__/admin/lib/respond.min.js"></script>
-
     <![endif]-->
 
     <link rel="stylesheet" type="text/css" href="__PUBLIC__/admin/static/h-ui/css/H-ui.min.css" />
@@ -21,7 +20,7 @@
     <link rel="stylesheet" type="text/css" href="__PUBLIC__/admin/lib/Hui-iconfont/1.0.8/iconfont.css" />
     <link rel="stylesheet" type="text/css" href="__PUBLIC__/admin/static/h-ui.admin/skin/default/skin.css" id="skin" />
     <link rel="stylesheet" type="text/css" href="__PUBLIC__/admin/static/h-ui.admin/css/style.css" />
-    <link href="__PUBLIC__/admin/css/main.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="__PUBLIC__/admin/css/main.css" />
 
     <!--[if IE 6]>
     <script type="text/javascript" src="__PUBLIC__/admin/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
@@ -45,26 +44,22 @@
 <body>
 <header class="navbar-wrapper">
     <div class="navbar navbar-fixed-top">
-        <div class="container-fluid cl"> <a class="logo navbar-logo f-l mr-10 hidden-xs" href="#">小程序商城后台管理系统</a> <a class="logo navbar-logo-m f-l mr-10 visible-xs" href="/aboutHui.shtml">H-ui</a>
-
-
+        <div class="container-fluid cl">
+            <a class="logo navbar-logo f-l mr-10 hidden-xs" href="#">小程序商城后台管理系统</a>
+            <a class="logo navbar-logo-m f-l mr-10 visible-xs" href="/aboutHui.shtml">H-ui</a>
             <nav id="Hui-userbar" class="nav navbar-nav navbar-userbar hidden-xs">
                 <ul class="cl">
                     <li>{$Think.session.admininfo.name}</li>
                     <li><a href="{:url('Login/logout')}">退出</a></li>
-
-
                 </ul>
             </nav>
         </div>
     </div>
 </header>
 
-{include file="Page:adminusermenu" /}
-
+{include file="page/adminusermenu" /}
 
 <section class="Hui-article-box">
-
     <div id="iframe_box" class="Hui-article">
         <div class="show_iframe">
             <iframe src='{:url("Page/adminindex")}' id='iframe' name='iframe'></iframe>
@@ -97,9 +92,6 @@
          }
          });*/
     });
-
-
-
 </script>
 
 </body>

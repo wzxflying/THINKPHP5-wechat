@@ -76,7 +76,6 @@
                       <a href="{:url('Product/pro_guige')}?pid={$v.id}">
                     <else />
                     <a href="{:url('Product/set_attr')}?pid={$v.id}"></if><font style="color:red;">属性设置</font></a> | -->
-                    <a href="{:url('set_tj')}?pro_id={$v.id}&name={$name}&tuijian={$tuijian}">推荐</a> |
                     <a href="{:url('Product/add')}?id={$v.id}&name={$name}&tuijian={$tuijian}">修改</a> |
                     <a onclick="del_id_urls({$v.id})">删除</a>
                 </td>

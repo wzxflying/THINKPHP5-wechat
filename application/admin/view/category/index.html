@@ -23,11 +23,6 @@
 	<![endif]-->
 	<script type="text/javascript" src="__PUBLIC__/admin/js/jquery.js"></script>
 	<script type="text/javascript" src="__PUBLIC__/admin/js/action.js"></script>
-	<script type="text/javascript">
-        function openDialog(type){
-            window.open('{:U("Inout/expAdminuser")}?name={$name}&tel={$tel}');
-        }
-	</script>
 	<title>管理员列表</title>
 </head>
 <body>
@@ -49,11 +44,11 @@
 		</thead>
 
 
-		<volist name='list' id='tr1'>
+		{volist name='list' id='tr1'}
 			<tr data-id="tr_{$tr1.tid}" class="text-c">
 				<td>{$tr1.id}</td>
 				<td style="text-align:left; padding-left:15px;">- {$tr1.name}</td>
-				<td><if condition="$tr1.bz_2 eq 1"><font style="color:#090">推荐</font></if></td>
+				<td>{eq name="$tr1.hot" value="1"}<font style="color:#090">推荐</font>{/eq}</td>
 				<td>
 					<a href="{:url('set_tj')}?tj_id={$tr1.id}">推荐</a>
 					<if condition="$tr1.bz_4 eq 1">
@@ -62,31 +57,31 @@
 					</if>
 				</td>
 			</tr>
-			<volist name='tr1["list2"]' id='tr2'>
+			{volist name='tr1["list2"]' id='tr2'}
 				<tr data-id="tr_{$tr2.tid}" class="text-c">
 					<td>{$tr2.id}</td>
 					<td style="text-align:left; padding-left:15px;">&nbsp; &nbsp; &nbsp;- {$tr2.name}</td>
-					<td><if condition="$tr2.bz_2 eq 1"><font style="color:#090">推荐</font></if></td>
+					<td>{eq name="$tr2.hot" value="1"}<font style="color:#090">推荐</font>{/eq}</td>
 					<td>
 						<a href="{:url('set_tj')}?tj_id={$tr2.id}">推荐</a> |
 						<a href="{:url('add')}?cid={$tr2.id}">修改</a> |
 						<a onclick="del_id_url({$tr2.id})">删除</a>
 					</td>
 				</tr>
-				<volist name='tr2["list3"]' id='tr3'>
+				{volist name='tr2["list3"]' id='tr3'}
 					<tr data-id="tr_{$tr3.tid}" class="text-c">
 						<td>{$tr3.id}</td>
 						<td style="text-align:left; padding-left:15px;">&nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp;- {$tr3.name}</td>
-						<td><if condition="$tr3.bz_2 eq 1"><font style="color:#090">推荐</font></if></td>
+						<td>{eq name="$tr3.hot" value="1"}<font style="color:#090">推荐</font>{/eq}</td>
 						<td>
 							<a href="{:url('set_tj')}?tj_id={$tr3.id}">推荐</a> |
 							<a href="{:url('add')}?cid={$tr3.id}">修改</a> |
 							<a onclick="del_id_url({$tr3.id})">删除</a>
 						</td>
 					</tr>
-				</volist>
-			</volist>
-		</volist>
+				{/volist}
+			{/volist}
+		{/volist}
 	</table>
 </div>
 <!--_footer 作为公共模版分离出去-->
@@ -103,7 +98,7 @@
     function del_id_url(id){
         if(confirm("确认删除吗？"))
         {
-            location='{:U("del")}?did='+id;
+            location='{:url("del")}?did='+id;
         }
     }
 </script>
