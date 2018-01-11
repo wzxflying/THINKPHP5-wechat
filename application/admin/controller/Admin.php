@@ -113,7 +113,7 @@ class Admin extends Controller
         }
         $img = $this->request->file($file);
         if (!empty($img)){
-            $info = $img->validate(['size' => '2097152', 'ext' => $exts])->rule('uniqid')->move(ROOT_PATH . 'public' . DS . 'Data' . DS . $path);
+            $info = $img->validate(['size' => '2097152', 'ext' => $exts])->move(ROOT_PATH . 'public' . DS . 'Data' . DS . $path);
             if ($info){
                 // 成功上传后 获取上传信息
                 // 输出 20160820/42a79759f284b767dfcb2a0197904287.jpg
@@ -126,4 +126,26 @@ class Admin extends Controller
         }
     }
 
+    public function uploadImages($file, $exts = 'jpg,png,gif', $path = null)
+    {
+        if (empty($path)){
+            return '请输入路径';
+        }
+        $imgs = $this->request->file($file);
+        if (!empty($imgs)){
+            $imgPath = null;
+            foreach ($imgs as $img){
+                $info = $img->validate(['size' => '2097152', 'ext' => $exts])->move(ROOT_PATH . 'public' . DS . 'Data' . DS . $path);
+                if ($info){
+                    // 成功上传后 获取上传信息
+                    // 输出 20160820/42a79759f284b767dfcb2a0197904287.jpg
+                    $imgName = $info->getSaveName();
+                    $imgPath .= '/Data/'. $path . DS . $imgName .',';
+                }else{
+                    echo $file->getError();
+                }
+            }
+            return $imgPath;
+        }
+    }
 }
