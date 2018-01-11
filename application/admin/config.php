@@ -7,7 +7,7 @@
  */
 return array(
     'view_replace_str' => array(
-        '__DATA__' => __PUBLIC__.'/Data',
+        '__DATA__' => '/Data/',
         '__PUBLIC__' => '/static',
     ),
 );
